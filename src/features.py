@@ -6,20 +6,21 @@ MAX_DURATION=4* 3600 # 4 hours
 ROLLING_WINDOW=100
 
 def feature_engineering(input_path: Path, output_path: Path):
+
     if not input_path.exists():
         raise FileNotFoundError(f"Input data file not found at {input_path}. Please run the ingestion process first.")
     
     df = pd.read_parquet(input_path)
 
-    df.dropna(subset=['pickup_datetime','dropOff_datetime'],inplace=True)
+    df.dropna(subset=["pickup_datetime","dropOff_datetime"],inplace=True)
 
-    df=df.sort_values('pickup_datetime')
+    df=df.sort_values("pickup_datetime")
     
 
     # Example feature engineering: create trip duration in minutes
-    df['pickup_datetime'] = pd.to_datetime(df['pickup_datetime'])
-    df['dropOff_datetime'] = pd.to_datetime(df['dropOff_datetime'])
-    df['trip_duration_minutes'] = (df['dropOff_datetime'] - df['pickup_datetime']).dt.total_seconds() / 60.0
+    df["pickup_datetime"] = pd.to_datetime(df['pickup_datetime'])
+    df["dropOff_datetime"] = pd.to_datetime(df['dropOff_datetime'])
+    df["trip_duration_minutes"] = (df["dropOff_datetime"] - df["pickup_datetime"]).dt.total_seconds() / 60.0
 
     df["pickup_week_of_year"]=df["pickup_datetime"].dt.isocalendar().week.astype(int)
     df["pickup_hour"]=df["pickup_datetime"].dt.hour.astype(int)
@@ -32,6 +33,9 @@ def feature_engineering(input_path: Path, output_path: Path):
     )
 
     
+    df["is_weekend"] = df["pickup_weekday"].isin([5, 6]).astype(int)
+    df["is_peak_hour"] = df["pickup_hour"].isin([7, 8, 9, 16, 17, 18]).astype(int)
+
     df["zone_trip_count"] = (
         df.groupby("PUlocationID").cumcount()
     )
@@ -41,12 +45,11 @@ def feature_engineering(input_path: Path, output_path: Path):
 
 
     df['rolling_avg_duration']=(df.groupby('PUlocationID')['trip_duration_minutes'].transform(
-        lambda x:x.rolling(window=ROLLING_WINDOW,min_periods=1).mean(
+        lambda x:x.rolling(window=ROLLING_WINDOW,min_periods=10).mean(
     ) ))
 
     leakage_columns=[
         'dropOff_datetime',
-        'trip_duration_minutes',
         'feedback',
         'payment_type',
         'fare_amount',

@@ -1,6 +1,7 @@
 pandas
 pyarrow
-scikit-learn
+scikit-learn<1.6
 mlflow
-xgboost
+xgboost >= 2.0.0
+fastapi
 fastparquet
