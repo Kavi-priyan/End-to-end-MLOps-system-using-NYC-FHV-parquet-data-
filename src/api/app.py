@@ -21,7 +21,7 @@ model = joblib.load(MODEL_PATH)
 # Input Schema (STRICT)
 # ---------------------------
 class TripFeatures(BaseModel):
-    trip_distance: float = Field(..., gt=0)
+ 
 
     PUlocationID: int
     DOlocationID: int

@@ -10,6 +10,9 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder,StandardScaler
 
 
+import mlflow
+import mlflow.sklearn
+
 DATA_PATH= Path("data/processed/fhv_2024_12_features.parquet")
 MODEL_PATH=Path("models/model.pkl")
 
@@ -65,16 +68,37 @@ def train():
 
     preds=pipeline.predict(X_test)
 
-    mae = mean_absolute_error(Y_test, preds)
-    rmse = root_mean_squared_error(Y_test, preds)
 
-    MODEL_PATH.parent.mkdir(parents=True, exist_ok=True)
+    mlflow.set_experiment("fhv_trip_duration")
+    with mlflow.start_run():
 
-    joblib.dump(pipeline, MODEL_PATH)
+        # Log parameters
+        mlflow.log_param("model_type", "XGBRegressor")
+        mlflow.log_param("n_estimators", 300)
+        mlflow.log_param("max_depth", 8)
+        mlflow.log_param("learning_rate", 0.05)
 
-    print("✅ Training complete")
-    print(f"MAE  : {mae:.2f} min")
-    print(f"RMSE : {rmse:.2f} min")
+        # Train
+        pipeline.fit(X_train, Y_train)
+
+        # Evaluate
+        preds = pipeline.predict(X_test)
+        mae = mean_absolute_error(Y_test, preds)
+        rmse = root_mean_squared_error(Y_test, preds)
+
+        # Log metrics
+        mlflow.log_metric("MAE", mae)
+        mlflow.log_metric("RMSE", rmse)
+
+        # Log model artifact
+        mlflow.sklearn.log_model(pipeline, artifact_path="model")
+
+        print("✅ Training complete")
+        print(f"MAE: {mae:.2f}, RMSE: {rmse:.2f}")
+
+        # Save locally too
+        joblib.dump(pipeline, MODEL_PATH)
+        print("✅ Model saved locally:", MODEL_PATH)
 
 if __name__=="__main__":
     train()
