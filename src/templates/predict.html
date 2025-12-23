@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<form action="/predict-ui" method="post">
+
+  <label>Pickup Location ID</label>
+  <input type="number" name="PUlocationID" required>
+
+  <label>Dropoff Location ID</label>
+  <input type="number" name="DOlocationID" required>
+
+  <label>Pickup Hour</label>
+  <input type="number" name="pickup_hour" min="0" max="23" required>
+
+  <label>Pickup Weekday</label>
+  <input type="number" name="pickup_weekday" min="0" max="6" required>
+
+  <label>Pickup Day</label>
+  <input type="number" name="pickup_day" min="1" max="31" required>
+
+  <label>Pickup Week of Year</label>
+  <input type="number" name="pickup_week_of_year" min="1" max="53" required>
+
+  <label>Is Weekend (0/1)</label>
+  <input type="number" name="is_weekend" min="0" max="1" required>
+
+  <label>Is Peak Hour (0/1)</label>
+  <input type="number" name="is_peak_hour" min="0" max="1" required>
+
+  <button type="submit">Predict</button>
+
+</form>
+
+{% endblock %}

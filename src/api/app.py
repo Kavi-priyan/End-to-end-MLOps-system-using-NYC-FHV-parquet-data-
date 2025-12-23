@@ -1,68 +1,83 @@
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, Request, Form
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
 import pandas as pd
 import joblib
 
-# ---------------------------
-# App
-# ---------------------------
-app = FastAPI(
-    title="NYC FHV Trip Duration Prediction API",
-    version="1.0.0"
-)
+from src.feature_store.online_store import read_online_features
+
+
+app = FastAPI(title="NYC FHV Trip Duration Predictor")
+
+templates = Jinja2Templates(directory="src/templates")
+app.mount("/static", StaticFiles(directory="src/templates/static"), name="static")
+
+model = joblib.load("models/model.pkl")
+
+
+@app.get("/")
+def home(request: Request):
+    return templates.TemplateResponse(
+        "index.html",
+        {"request": request}
+    )
 
 # ---------------------------
-# Load trained pipeline
+# Prediction Form Page
 # ---------------------------
-MODEL_PATH = "models/model.pkl"
-model = joblib.load(MODEL_PATH)
-
-# ---------------------------
-# Input Schema (STRICT)
-# ---------------------------
-class TripFeatures(BaseModel):
- 
-
-    PUlocationID: int
-    DOlocationID: int
-
-    pickup_hour: int = Field(..., ge=0, le=23)
-    pickup_weekday: int = Field(..., ge=0, le=6)
-    pickup_day: int = Field(..., ge=1, le=31)
-    pickup_week_of_year: int = Field(..., ge=1, le=53)
-
-    is_weekend: int = Field(..., ge=0, le=1)
-    is_peak_hour: int = Field(..., ge=0, le=1)
-
-    hour_zone: str
-
-    # Rolling historical features (from feature engineering)
-    rolling_avg_duration: float = Field(..., gt=0)
-    zone_trip_count: int = Field(..., ge=0)
+@app.get("/predict-ui")
+def predict_ui(request: Request):
+    return templates.TemplateResponse(
+        "predict.html",
+        {"request": request}
+    )
 
 # ---------------------------
-# Health Check
+# Handle Prediction
 # ---------------------------
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+@app.post("/predict-ui")
+def predict_result(
+    request: Request,
+    PUlocationID: int = Form(...),
+    DOlocationID: int = Form(...),
+    pickup_hour: int = Form(...),
+    pickup_weekday: int = Form(...),
+    pickup_day: int = Form(...),
+    pickup_week_of_year: int = Form(...),
+    is_weekend: int = Form(...),
+    is_peak_hour: int = Form(...)
+):
+    hour_zone = f"{pickup_hour}_{PUlocationID}"
 
-# ---------------------------
-# Prediction Endpoint
-# ---------------------------
-@app.post("/predict")
-def predict_trip_duration(payload: TripFeatures):
-    """
-    Predict trip duration (seconds) for an FHV ride.
-    """
+    zone_features = read_online_features(PUlocationID)
 
-    # Convert request → DataFrame
-    df = pd.DataFrame([payload.dict()])
+   
 
-    # Predict
+    data = {
+        
+        "PUlocationID": PUlocationID,
+        "DOlocationID": DOlocationID,
+        "pickup_hour": pickup_hour,
+        "pickup_weekday": pickup_weekday,
+        "pickup_day": pickup_day,
+        "pickup_week_of_year": pickup_week_of_year,
+        "is_weekend": is_weekend,
+        "is_peak_hour": is_peak_hour,
+        "hour_zone": hour_zone,
+        **zone_features
+      
+    }
+
+    
+
+    df = pd.DataFrame([data])
     prediction = model.predict(df)[0]
 
-    return {
-        "predicted_trip_duration_sec": round(float(prediction), 2),
-        "predicted_trip_duration_min": round(float(prediction) / 60, 2)
-    }
+    return templates.TemplateResponse(
+        "result.html",
+        {
+            "request": request,
+            "seconds": round(prediction, 2),
+            "minutes": round(prediction / 60, 2)
+        }
+    )

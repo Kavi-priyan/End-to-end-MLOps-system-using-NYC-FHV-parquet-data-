@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Prediction Result</h2>
+
+<p><strong>Estimated Trip Duration:</strong></p>
+<h3>{{ minutes }} minutes</h3>
+<p>({{ seconds }} seconds)</p>
+
+<a class="btn" href="/predict-ui">Predict Another Trip</a>
+{% endblock %}

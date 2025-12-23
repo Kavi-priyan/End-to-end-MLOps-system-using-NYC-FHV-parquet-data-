@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYC FHV Predictor | MLOps Dashboard</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <link rel="icon" type="image/png" href="https://imgs.search.brave.com/jbhklxp3kT7sZ8GzpRwjzJlPVEBdpmMR6L07SZ7sOug/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pLnBp/bmltZy5jb20vb3Jp/Z2luYWxzLzY4LzUw/L2U4LzY4NTBlODhk/NmI2OGJmMDFlZjk1/ODU4YmY0ZTU2NTRk/LmpwZw">
+    
+      <link rel="stylesheet" href="/static/style.css">
+
+    <style>
+        /* Quick fix to apply the new font globally */
+        :root {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🚕 NYC FHV Trip Duration Predictor</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/predict-ui">Predict</a>
+            <a href="http://127.0.0.1:5000" target="_blank">MLflow</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>Production MLOps Demo • FastAPI • Feature Store • MLflow</p>
+    </footer>
+</body>
+</html>

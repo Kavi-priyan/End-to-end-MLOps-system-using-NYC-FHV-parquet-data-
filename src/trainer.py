@@ -13,6 +13,9 @@ from sklearn.preprocessing import OneHotEncoder,StandardScaler
 import mlflow
 import mlflow.sklearn
 
+
+from feature_store.online_store import init__db
+
 DATA_PATH= Path("data/processed/fhv_2024_12_features.parquet")
 MODEL_PATH=Path("models/model.pkl")
 
@@ -98,7 +101,9 @@ def train():
 
         # Save locally too
         joblib.dump(pipeline, MODEL_PATH)
+
         print("✅ Model saved locally:", MODEL_PATH)
 
 if __name__=="__main__":
+    init__db()
     train()

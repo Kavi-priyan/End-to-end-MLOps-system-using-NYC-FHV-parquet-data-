@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+    <div class="badge">Production Ready</div>
+    <h2>NYC FHV Trip Analytics</h2>
+    <p class="subtitle">
+        Predicting ride durations using leakage-safe, production-grade ML pipelines.
+    </p>
+</div>
+
+<div class="features-grid">
+    <div class="feature-card">
+        <span class="icon">📅</span>
+        <h3>Time-aware Split</h3>
+        <p>Prevents data leakage by respecting temporal order in train/test sets.</p>
+    </div>
+    <div class="feature-card">
+        <span class="icon">📈</span>
+        <h3>Rolling Features</h3>
+        <p>Historical averages and trends calculated over sliding windows.</p>
+    </div>
+    <div class="feature-card">
+        <span class="icon">🧪</span>
+        <h3>MLflow Tracking</h3>
+        <p>Full experiment reproducibility and model versioning.</p>
+    </div>
+    <div class="feature-card">
+        <span class="icon">⚡</span>
+        <h3>FastAPI Inference</h3>
+        <p>Ultra-low latency model serving via a RESTful API.</p>
+    </div>
+</div>
+
+<div class="cta-section">
+    <a class="btn primary-btn" href="/predict-ui">Launch Prediction UI</a>
+</div>
+{% endblock %}

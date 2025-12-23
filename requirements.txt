@@ -5,3 +5,4 @@ mlflow
 xgboost >= 2.0.0
 fastapi
 fastparquet
+python-multipart
