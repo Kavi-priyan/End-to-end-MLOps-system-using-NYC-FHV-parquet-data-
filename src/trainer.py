@@ -14,7 +14,7 @@ import mlflow
 import mlflow.sklearn
 
 
-from feature_store.online_store import init__db
+from feature_store.online_store import init__db, write_online_features
 
 DATA_PATH= Path("data/processed/fhv_2024_12_features.parquet")
 MODEL_PATH=Path("models/model.pkl")
@@ -24,6 +24,7 @@ DATE="2024-12-24"
 TARGET="trip_duration_minutes"
 
 def train():
+    init__db()
     df=pd.read_parquet(DATA_PATH)
 
    
@@ -70,6 +71,8 @@ def train():
     pipeline.fit(X_train,Y_train)
 
     preds=pipeline.predict(X_test)
+    mae = mean_absolute_error(Y_test, preds)
+    rmse = root_mean_squared_error(Y_test, preds)
 
 
     mlflow.set_experiment("fhv_trip_duration")
@@ -80,14 +83,6 @@ def train():
         mlflow.log_param("n_estimators", 300)
         mlflow.log_param("max_depth", 8)
         mlflow.log_param("learning_rate", 0.05)
-
-        # Train
-        pipeline.fit(X_train, Y_train)
-
-        # Evaluate
-        preds = pipeline.predict(X_test)
-        mae = mean_absolute_error(Y_test, preds)
-        rmse = root_mean_squared_error(Y_test, preds)
 
         # Log metrics
         mlflow.log_metric("MAE", mae)
@@ -103,6 +98,9 @@ def train():
         joblib.dump(pipeline, MODEL_PATH)
 
         print("✅ Model saved locally:", MODEL_PATH)
+
+        # Update online feature store
+        write_online_features(df)
 
 if __name__=="__main__":
     init__db()

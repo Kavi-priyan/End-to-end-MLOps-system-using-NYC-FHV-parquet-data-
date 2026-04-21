@@ -77,7 +77,7 @@ def predict_result(
         "result.html",
         {
             "request": request,
-            "seconds": round(prediction, 2),
-            "minutes": round(prediction / 60, 2)
+            "seconds": round(prediction * 60, 2),
+            "minutes": round(prediction, 2)
         }
     )

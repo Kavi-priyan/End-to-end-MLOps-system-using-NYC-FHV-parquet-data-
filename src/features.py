@@ -45,7 +45,7 @@ def feature_engineering(input_path: Path, output_path: Path):
 
 
     df['rolling_avg_duration']=(df.groupby('PUlocationID')['trip_duration_minutes'].transform(
-        lambda x:x.rolling(window=ROLLING_WINDOW,min_periods=10).mean(
+        lambda x:x.rolling(window=ROLLING_WINDOW,min_periods=1).mean(
     ) ))
 
     leakage_columns=[
